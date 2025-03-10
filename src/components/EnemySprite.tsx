@@ -36,9 +36,17 @@ export const EnemySprite = ({
     const [animationState, setAnimationState] = useState(EnemyAnimationState.IDLE);
     const [flipX, setFlipX] = useState(false);
 
-    // The sprite sheet has 8 columns of animations
-    const columns = 8;
-    const framesPerAnimation = 8;
+    // Animation configuration
+    const columns = 8; // 8 frames per row
+    const framesPerAnimation = 8; // Each animation has 8 frames
+
+    // Animation speed - adjust based on character state and type
+    const getAnimationSpeed = () => {
+        if (isShooting) return 0.06; // Fast animation for shooting
+        if (type === EnemyType.JUMPER) return 0.09; // Slightly faster for jumpers
+        if (type === EnemyType.SHOOTER) return 0.12; // Slower for shooters
+        return 0.1; // Default for walkers
+    };
 
     // Adjust animation state based on enemy state
     useEffect(() => {
@@ -67,7 +75,7 @@ export const EnemySprite = ({
             rows={6} // Total 6 rows (3 yellow + 3 green)
             columns={columns}
             totalFrames={framesPerAnimation}
-            animationSpeed={0.12} // Slightly different speed for variety
+            animationSpeed={getAnimationSpeed()}
             scale={1.2} // Slightly smaller than player
             animationRow={spriteRow}
             flipX={flipX}

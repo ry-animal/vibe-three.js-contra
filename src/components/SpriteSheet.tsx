@@ -40,9 +40,20 @@ export const SpriteSheet = ({
         loader.load(textureUrl, (loadedTexture) => {
             loadedTexture.magFilter = THREE.NearestFilter;
             loadedTexture.minFilter = THREE.NearestFilter;
+
+            // Important: Set wrapping to clamp to avoid texture bleeding
+            loadedTexture.wrapS = THREE.ClampToEdgeWrapping;
+            loadedTexture.wrapT = THREE.ClampToEdgeWrapping;
+
+            // Initialize with first frame
+            const frameWidth = 1 / columns;
+            const frameHeight = 1 / rows;
+            loadedTexture.repeat.set(frameWidth, frameHeight);
+            loadedTexture.offset.set(0, 1 - frameHeight);
+
             setTexture(loadedTexture);
         });
-    }, [textureUrl]);
+    }, [textureUrl, columns, rows]);
 
     // Handle animation
     useFrame((state) => {
@@ -57,20 +68,24 @@ export const SpriteSheet = ({
             if (newFrame === 0 && onAnimationComplete) {
                 onAnimationComplete();
             }
-        }
 
-        if (meshRef.current && texture) {
-            // Update UV coordinates for current frame
+            // Update UV coordinates for current frame when the frame changes
             const frameWidth = 1 / columns;
             const frameHeight = 1 / rows;
 
-            const col = currentFrame % columns;
+            const col = newFrame % columns;
             const row = animationRow;
 
-            const offset = new THREE.Vector2(col * frameWidth, 1 - (row + 1) * frameHeight);
-            texture.offset.copy(offset);
-            texture.repeat.set(frameWidth, frameHeight);
+            // Calculate UV offset - need to flip Y since texture coordinates are bottom-left origin
+            // but we want top-left origin for the sprite sheet
+            const offsetX = col * frameWidth;
+            const offsetY = 1 - ((row + 1) * frameHeight);
 
+            texture.offset.set(offsetX, offsetY);
+            texture.repeat.set(frameWidth, frameHeight);
+        }
+
+        if (meshRef.current) {
             // Apply flip if needed
             if (meshRef.current.scale.x !== (flipX ? -scale : scale)) {
                 meshRef.current.scale.x = flipX ? -scale : scale;

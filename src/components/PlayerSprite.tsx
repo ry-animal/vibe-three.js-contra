@@ -31,9 +31,17 @@ export const PlayerSprite = ({
     const [blinking, setBlinking] = useState(false);
     const [visible, setVisible] = useState(true);
 
-    // The sprite sheet has 8 columns of animations
-    const columns = 8;
-    const framesPerAnimation = 8;
+    // Animation configuration
+    const columns = 8; // 8 frames per row
+    const framesPerAnimation = 8; // Each animation has 8 frames
+
+    // Animation speed - adjust based on character state
+    const getAnimationSpeed = () => {
+        if (isShooting) return 0.07; // Faster animation for shooting
+        if (isJumping) return 0.1;   // Normal speed for jumping
+        if (facingDirection !== 0) return 0.08; // Slightly faster for running
+        return 0.15; // Slower for idle
+    };
 
     // Adjust animation state based on player state
     useEffect(() => {
@@ -88,7 +96,7 @@ export const PlayerSprite = ({
             rows={6} // Total 6 rows (3 yellow + 3 green)
             columns={columns}
             totalFrames={framesPerAnimation}
-            animationSpeed={0.1}
+            animationSpeed={getAnimationSpeed()}
             scale={1.5}
             animationRow={spriteRow}
             flipX={flipX}
